@@ -1,0 +1,61 @@
+.upload_form{
+    max-width: 500px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: cyan;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.upload_form input{
+    border-radius: 5px;
+    width: 80%;
+    height: 30px;
+}
+
+.head{
+    margin-top: 20px;
+}
+
+.main_container{
+    margin: 30px 0px;
+    width: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.widget{
+    background-color: rgb(230, 229, 229);
+    width: 200px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    box-shadow: 0px 0px 5px 1px black;
+}
+
+.widget img{
+    height: 250px;
+    width: 200px;
+}
+
+.product_info{
+    display: flex;
+    font-size: 20px;
+    flex-direction: column;
+}
+
+.buttons{
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
