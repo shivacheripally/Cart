@@ -34,8 +34,8 @@
 
 .widget{
     background-color: rgb(230, 229, 229);
-    width: 200px;
-    height: 300px;
+    width: 250px;
+    /* height: 400px; */
     display: flex;
     flex-direction: column;
     text-align: center;
@@ -43,8 +43,8 @@
 }
 
 .widget img{
-    height: 250px;
-    width: 200px;
+    height: 300px;
+    width: 250px;
 }
 
 .product_info{
