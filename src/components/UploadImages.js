@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import {db} from '../FirebaseInit';
-import { collection, addDoc } from "firebase/firestore"; 
+import { getDoc, setDoc, doc, updateDoc, arrayUnion } from "firebase/firestore"; 
 import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import styled from '../App.module.css';
 import Showdata from './Showdata';
 
-export default function UploadImages(){
+export default function UploadImages(props){
     const [image, setImage] = useState('');
-    const [cost, setCost] = useState('');
     const [name, setName] = useState('');
+    const {uploadRate} = props;
 
     const handleSubmit = async (e)=>{
         e.preventDefault();
@@ -30,13 +30,34 @@ export default function UploadImages(){
                 return ;
             }
         }
-        const docRef = await addDoc(collection(db, "products"), {
-            name, cost, imageUrl
+        // Get the reference to the document in the "rates" collection
+        const rateDocumentRef = doc(db, "rates", uploadRate.toString());
+        
+        // Check if the document exists
+        const rateDocumentSnapshot = await getDoc(rateDocumentRef);
+        const newData = {
+            name, imageUrl
+        };
+
+        if (rateDocumentSnapshot.exists()) {
+            // If the document exists, update the "products" array using arrayUnion
+            await updateDoc(rateDocumentRef, {
+                products: arrayUnion(newData)
+            });
+        } else {
+            // If the document doesn't exist, create it with the "products" array
+            await setDoc(rateDocumentRef, {
+                products: [newData]
+            });
+        }
+
+        // Update the array field "products" with the new data using arrayUnion
+        await updateDoc(rateDocumentRef, {
+            products: arrayUnion(newData)
         });
-        console.log("Document written with ID: ", docRef.id, image);
-        alert('Image Upload Is Successfull!');
+
+        alert(`Image Upload Is Successfull! ${uploadRate}`);
         setImage('');
-        setCost('');
         setName('');
     }
 
@@ -46,12 +67,12 @@ export default function UploadImages(){
                 Uploading Images
             </h1>
             <form className={styled.upload_form} onSubmit={(e)=>handleSubmit(e)}>
+                <b>Cost: {uploadRate}</b>
                 <input onChange={(e)=>{setImage(e.target.files[0])}} type="file" required/>
-                <input value={cost} onChange={(e)=>{setCost(e.target.value)}} type="number" name="cost" required placeholder='Enter Cost: '/>
                 <input value={name} onChange={(e)=>{setName(e.target.value)}} type="text" name="name" placeholder='Enter name of the product: '/>
                 <button className='btn btn-primary'>Submit</button>
             </form>
-            <Showdata cost={cost} name={name} setCost={setCost} setName={setName} setImage={setImage}/>
+            <Showdata name={name} setName={setName} uploadRate={uploadRate} setImage={setImage}/>
         </>
     );
 }

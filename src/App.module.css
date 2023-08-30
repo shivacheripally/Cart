@@ -59,3 +59,55 @@
     align-items: center;
     justify-content: space-between;
 }
+
+/* CreateFolder */
+.folder_container{
+    width: 60%;
+    margin: 20px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.folder{
+    width: 150px;
+    height: 170px;
+    box-shadow: 0px 0px 5px black;
+    border-bottom-left-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.folder span{
+    font-size: 40px;
+}
+
+.folder_form{
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.folder_form input{
+    border-radius: 5px;
+    width: 80%;
+}
+
+.manage_data{
+    margin: 10px 0px;
+    width: 70%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.manage_data span{
+    font-size: 30px;
+}

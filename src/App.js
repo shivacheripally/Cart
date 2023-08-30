@@ -1,9 +1,9 @@
 import React from "react";
-import UploadImages from "./components/UploadImages";
+import CreateFolder from "./components/CreateFolder";
 function App() {
   return (
     <center>
-      <UploadImages />
+      <CreateFolder />
     </center>
   );
 }
