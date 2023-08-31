@@ -1,4 +1,4 @@
-import { collection, getDocs, setDoc, doc,deleteDoc } from "firebase/firestore";
+import { collection, getDocs, setDoc, doc,deleteDoc, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from 'react';
 import styled from '../App.module.css';
 import { db } from '../FirebaseInit';
@@ -60,15 +60,23 @@ export default function CreateFolder(){
         fetchData();
     }, []);
 
-    useEffect(()=>{
-        const fetchData = async ()=>{
-            const querySnapshot = await getDocs(collection(db, "rates"));
-            const data = querySnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
-            setRates(data);
-        }
+    useEffect(() => {
+        const fetchData = async () => {
+            const unsubscribe = onSnapshot(collection(db, "rates"), (querySnapshot) => {
+                const data = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+                setRates(data);
+            });
+    
+            // Return a cleanup function to unsubscribe when component unmounts
+            return () => {
+                unsubscribe();
+            };
+        };
+    
         fetchData();
-    }, [price]);
-
+    }, []);
+    
+    
     const handleSubmit = async (e)=>{
         e.preventDefault();
         // Add a new document with a generated id.

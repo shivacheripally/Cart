@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, getDoc, setDoc } from "firebase/firestore";
+import { collection, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from '../FirebaseInit';
 import styled from '../App.module.css';
@@ -57,13 +57,14 @@ export default function Showdata(props) {
   useEffect(() => {
     async function fetchData() {
       try {
-            const querySnapshot = await getDocs(collection(db, "rates"));
+        const unsubscribe = onSnapshot(collection(db, "rates"), (querySnapshot) => {
             const data = querySnapshot.docs
             .filter((doc) => {
                 // Replace 'desiredId' with the ID you want to filter for
                 return doc.id === `${uploadRate.toString()}`;
             }).map((doc) => ({ id: doc.id, ...doc.data() }));
         setProducts(data);
+        })
       } catch (error) {
         console.error("Error fetching data:", error);
       }
