@@ -54,24 +54,26 @@ export default function Showdata(props) {
         alert('Update Successfull!');
     }
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const unsubscribe = onSnapshot(collection(db, "rates"), (querySnapshot) => {
-            const data = querySnapshot.docs
-            .filter((doc) => {
-                // Replace 'desiredId' with the ID you want to filter for
-                return doc.id === `${uploadRate.toString()}`;
-            }).map((doc) => ({ id: doc.id, ...doc.data() }));
-        setProducts(data);
-        })
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    }
-
-    fetchData();
-  }, [uploadRate]);
+    useEffect(() => {
+        async function fetchData() {
+          try {
+            // Remove the 'const unsubscribe =' line, as it's not used.
+            onSnapshot(collection(db, "rates"), (querySnapshot) => {
+              const data = querySnapshot.docs
+                .filter((doc) => {
+                  // Replace 'desiredId' with the ID you want to filter for
+                  return doc.id === `${uploadRate.toString()}`;
+                })
+                .map((doc) => ({ id: doc.id, ...doc.data() }));
+              setProducts(data);
+            });
+          } catch (error) {
+            console.error("Error fetching data:", error);
+          }
+        }
+      
+        fetchData();
+      }, [uploadRate]);      
 
   return (
     <>
