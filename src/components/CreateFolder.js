@@ -5,13 +5,13 @@ import { db } from '../FirebaseInit';
 import UploadImages from './UploadImages';
 
 function Form(props){
-    const {setPrice, handleSubmit} = props;
+    const {visible, setVisible, setPrice, handleSubmit} = props;
 
     return (
         <form onSubmit={(e)=>{handleSubmit(e)}} className={styled.folder_form}>
-            <input onChange={(e)=>{setPrice(e.target.value)}} type="number" placeholder='Enter Cost:'/>
+            <input onChange={(e)=>{setPrice(e.target.value)}} type="number" placeholder='Enter Cost:' required/>
             <button className='btn btn-primary'>Done</button>
-            <button className='btn btn-danger'>Cancel</button>
+            <button onClick={()=>{setVisible(!visible)}} className='btn btn-danger'>Cancel</button>
         </form>
     );
 }
