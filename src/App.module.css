@@ -111,3 +111,14 @@
 .manage_data span{
     font-size: 30px;
 }
+
+.toggleForm{
+    width: auto;
+    height: 100px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border: 1px solid black;
+}

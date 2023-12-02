@@ -1,103 +1,151 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDoc, setDoc, onSnapshot } from "firebase/firestore";
-import { doc, updateDoc } from "firebase/firestore";
+import { collection, updateDoc, doc, getDocs, deleteDoc, onSnapshot } from "firebase/firestore";
 import { db } from '../FirebaseInit';
 import styled from '../App.module.css';
 
-async function DeleteItem(product, index){
-    console.log("id: ", product.products, index);
-    try{
-        const rateDocumentRef = doc(db, "rates", product.id.toString());
+async function DeleteMultipleItems(uploadRate, deleteItems, setSelectDelete) {
+    try {
+        const rateDocumentRef = doc(db, "rates", uploadRate.toString());
 
-// Check if the document exists
-const rateDocumentSnapshot = await getDoc(rateDocumentRef);
-const newArr = product.products.filter((_, i) => i !== index);
-console.log('newArr', newArr);
-    if (rateDocumentSnapshot.exists()) {
-    // If the document exists, update the "products" array with the new array
-    await updateDoc(rateDocumentRef, {
-        products: newArr
-    });
-    } else {
-        // If the document doesn't exist, create it with the "products" array
-        await setDoc(rateDocumentRef, {
-            products: newArr
+        const productCollectionRef = collection(rateDocumentRef, "products");
+
+
+        const querySnapshot = await getDocs(productCollectionRef);
+        querySnapshot.forEach((docs) => {
+            deleteItems.forEach(async (item) => {
+                if (docs.id === item) {
+                    await deleteDoc(doc(db, "rates", uploadRate.toString(), "products", item));
+                }
+            })
         });
+        if (deleteItems.length) alert(`Successfully Deleted ${deleteItems.length} Items!`);
+        setSelectDelete([]);
     }
-
-    }
-    catch{
+    catch {
         console.log('Error while Deleting the item');
-        return ;
+        return;
     }
-    alert('Delete Is Successfull!');
+}
+
+async function DeleteItem(id, uploadRate) {
+    try {
+        const rateDocumentRef = doc(db, "rates", uploadRate.toString());
+
+        const productCollectionRef = collection(rateDocumentRef, "products");
+
+
+        const querySnapshot = await getDocs(productCollectionRef);
+        querySnapshot.forEach(async (docs) => {
+            if (docs.id === id) {
+                await deleteDoc(doc(db, "rates", uploadRate.toString(), "products", id));
+            }
+        });
+        alert('Delete Is Successfull!');
+    }
+    catch {
+        console.log('Error while Deleting the item');
+        return;
+    }
+}
+
+export async function UpdateItem(e, id, imageUrl, name, setIsEdit, uploadRate, price) {
+    e.preventDefault();
+    const ratesDocRef = doc(db, "rates", uploadRate.toString());
+    const productsCollectionRef = collection(ratesDocRef, "products");
+    const productDocRef = doc(productsCollectionRef, id);
+    try {
+        await updateDoc(productDocRef, {
+            imageUrl,
+            name,
+            price
+        });
+        setIsEdit(false);
+        alert('Update Successfull!');
+    }
+    catch {
+        console.log('Error while updating the data');
+        return;
+    }
 }
 
 export default function Showdata(props) {
-  const { setName, setImage, uploadRate} = {...props};  
-  const [products, setProducts] = useState([]);
+    const [toggleShowData, setToggleShowData] = useState(false);
+    const { uploadRate, isEdit, setIsEdit, setName, setUpdateUrl, setUpdateId, setUpdatePrice } = { ...props };
+    const [products, setProducts] = useState([]);
+    const [selectDelete, setSelectDelete] = useState([]);
 
-  async function updateItem(id, name, imageUrl){
-    setName(name);
-    setImage(imageUrl);
-    console.log("clicked", id);
-    const washingtonRef = doc(db, "products", id);
-        try{
-            await updateDoc(washingtonRef, {
-                capital: true
-            });
+    const handleCheckboxChange = (id) => {
+        // Check if the id is already in selectDelete
+        const isSelected = selectDelete.includes(id);
+        // If the id is already in selectDelete, remove it; otherwise, add it
+        if (isSelected) {
+            setSelectDelete((prevSelectDelete) =>
+                prevSelectDelete.filter((selectedId) => selectedId !== id)
+            );
+        } else {
+            setSelectDelete([id, ...selectDelete]);
         }
-        catch{
-            console.log('Error while updating the data');
-            return ;
-        }
-        alert('Update Successfull!');
     }
 
     useEffect(() => {
-        async function fetchData() {
-          try {
-            // Remove the 'const unsubscribe =' line, as it's not used.
-            onSnapshot(collection(db, "rates"), (querySnapshot) => {
-              const data = querySnapshot.docs
-                .filter((doc) => {
-                  // Replace 'desiredId' with the ID you want to filter for
-                  return doc.id === `${uploadRate.toString()}`;
-                })
-                .map((doc) => ({ id: doc.id, ...doc.data() }));
-              setProducts(data);
+        const fetchProducts = async () => {
+            const ratesDocRef = doc(db, "rates", uploadRate.toString());
+            const productsCollectionRef = collection(ratesDocRef, "products");
+
+            const unsubRatesDoc = onSnapshot(ratesDocRef, (doc) => {
             });
-          } catch (error) {
-            console.error("Error fetching data:", error);
-          }
-        }
-      
-        fetchData();
-      }, [uploadRate]);      
 
-  return (
-    <>
-    <h1 className={styled.head}>Available Data</h1>
-    <div>
-        {products && products.map((product, index) => (
-            <div className={styled.main_container} key={index}>
-                {product.products.map((item, itemIndex) => (
-                    <div className={styled.widget} key={itemIndex}>
-                        <img src={item.imageUrl} alt={"image" + itemIndex} />
-                        <div className={styled.product_info}>
-                            {/* <span>About: {product.name}</span> */}
-                            <span>Price: <b>{product.price}</b></span>
-                        </div>
-                        <div className={styled.buttons}>
-                            <button onClick={() => { updateItem(product.id, product.price, product.name, product.imageUrl) }} className="btn btn-primary">Edit</button>
-                            <button onClick={() => { DeleteItem(product, itemIndex) }} className="btn btn-danger">Delete</button>
-                        </div>
-                    </div>
-                ))}
+            const unsubProductsCollection = onSnapshot(productsCollectionRef, (snapshot) => {
+                const data = snapshot.docs.map((doc) => {
+                    return { id: doc.id, ...doc.data() };
+                });
+                setProducts(data);
+            });
+
+            return () => {
+                unsubRatesDoc();
+                unsubProductsCollection();
+            };
+        };
+
+        fetchProducts();
+    }, [uploadRate]);
+
+    const handleEditClick = (id, imageUrl, name, price) => {
+        setName(name);
+        setUpdateUrl(imageUrl);
+        setUpdateId(id);
+        setUpdatePrice(price);
+        setIsEdit(!isEdit);
+    }
+
+    return (
+        <>
+            <br />
+            <div className={styled.buttons} style={{ maxWidth: '300px' }}>
+                <button className="btn btn-primary" onClick={() => setToggleShowData(!toggleShowData)}>{toggleShowData ? "Hide Data" : "Show Data"}</button>
+                {selectDelete.length !== 0 && <button className="btn btn-danger" onClick={() => DeleteMultipleItems(uploadRate, selectDelete, setSelectDelete)}>Delete Selected</button>}
             </div>
-        ))}
-    </div>
-</>
-
-  );
+            {toggleShowData && <div>
+                <div className={styled.main_container}>
+                    {products.map((product) => {
+                        return (
+                            <div className={styled.widget} key={product.id}>
+                                <img src={product.imageUrl} alt={"image" + product.price} />
+                                <div className={styled.product_info}>
+                                    <span>About: {product.name}</span>
+                                    <span>Price: <b>{product.price}</b></span>
+                                </div>
+                                <div className={styled.buttons}>
+                                    <button className="btn btn-primary" onClick={() => handleEditClick(product.id, product.imageUrl, product.name, product.price)}>Edit</button>
+                                    {selectDelete.includes(product.id) ? <input type="checkbox" onChange={() => handleCheckboxChange(product.id)} checked /> : <input type="checkbox" onChange={() => handleCheckboxChange(product.id)} />}
+                                    <button onClick={() => { DeleteItem(product.id, uploadRate) }} className="btn btn-danger">Delete</button>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>}
+        </>
+    );
 }
