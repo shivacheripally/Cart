@@ -55,6 +55,7 @@ export default function UploadImages(props) {
     return (
         <>
             {!toggleFolders && <div>
+                <br />
                 <h1>
                     {!toggleFolders && <button onClick={() => setToggleFolders(!toggleFolders)} className='btn btn-secondary'>Go Back</button>}
                     &nbsp; Uploading Images
